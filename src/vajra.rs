@@ -190,7 +190,7 @@ pub struct FlashWriterEraser {
     //             dst = ((dst as u32) + 4) as *mut u32; // increment pointer by 4
     //             idx += 4;
     //         } else {
-    //             // else do a single byte write i.e. 1-byte write
+    //             // else do a single byte write write_uart_characteri.e. 1-byte write
     //             let mut val = 0u32;
     //             let val_bytes = ((&mut val) as *mut u32) as *mut u8;
     //             let offset = (address + idx) - (((address + idx) >> 2) << 2); // offset from nearest word aligned address
