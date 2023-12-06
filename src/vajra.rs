@@ -80,32 +80,51 @@ pub const STS_RX_NOT_EMPTY: u8 = 1 << 2;
 pub const STS_TX_FULL: u8 = 1 << 1;
 pub const STS_TX_EMPTY: u8 = 1 << 0;
 
-const MAX_UART_COUNT: usize = 3/* your value here */;
-const UART_OFFSET: usize = 0x100/* your value here */;
-const UART0_START: usize = 0x00011300/* your value here */;
+pub const MAX_UART_COUNT: usize = 3/* your value here */;
+pub const UART_OFFSET: usize = 0x100/* your value here */;
+pub const UART0_START: usize = 0x00011300/* your value here */;
+pub const UART1_START: usize = 0x00011400/* your value here */;
+pub const UART2_START: usize = 0x00011500/* your value here */;
+
+// const UART0: UartStruct = unsafe{ *UART0_START.as_mut().unwrap() };
+// const UART1: UartStruct = unsafe{ *UART1_START.as_mut().unwrap() };
+// const UART2: UartStruct = unsafe{ *UART2_START.as_mut().unwrap() };
 
 // Assuming you have already defined the UartStruct as mentioned earlier
 
 const ARRAY_REPEAT_VALUE: Option<&'static mut UartStruct> = None;
 
-pub static mut UART_INSTANCE: [Option<&'static mut UartStruct>; MAX_UART_COUNT] = [ARRAY_REPEAT_VALUE; MAX_UART_COUNT];
+pub static mut UART_INSTANCE: [Option<UartStruct>; MAX_UART_COUNT] = [None; MAX_UART_COUNT];
 
-// pub UART_INSTANCE:UartStruct = [0..MAX_UART_COUNT];
-
-impl Uart {
-    // pub fn new()-> Self {
-    //     UartStruct { baud: 19200, reserv0: (), tx_reg: (), rcv_reg: (), status: (), reserv1: (), reserv2: (), delay: (), reserv3: (), control: (), reserv5: (), ien: (), reserv6: (), reserv7: (), iqcycles: (), reserv8: (), reserv9: () }
-    // }
-    pub fn new(base_address: usize) -> Self {
-        Self { base_address }
-    }
-
-    pub fn init_uart(&self) -> UartStruct {
-        let raw_ptr  =  self.base_address as *mut UartStruct;
-        let rust_reference: UartStruct = unsafe{ *raw_ptr.as_mut().unwrap() };
-        rust_reference
+pub fn uart_init() {
+    unsafe {
+        for i in 0..MAX_UART_COUNT {
+            let uart_address = UART0_START + i * UART_OFFSET;
+            UART_INSTANCE[i] = Some(core::ptr::read(uart_address as *const UartStruct));
+        }
     }
 }
+
+// impl UartStruct {
+    // pub fn new(base_addr:u32)-> Self {
+    //     let uart_obj = UartStruct { baud: 0, reserv0: 0, tx_reg: 0, rcv_reg: 0, 
+    //                                 status: 0, reserv1: 0, reserv2: 0, delay: 0, reserv3: 0, control: 0, 
+    //                                 reserv5: 0, ien: 0, reserv6: 0, reserv7: 0, iqcycles: 0, reserv8: 0, 
+    //                                 reserv9: 0 };
+    //     uart_obj.baud = base_addr as u16;
+    // }
+    // pub fn new(base_address: usize) -> Self {
+    //     Self { base_address }
+    // }
+
+    
+
+    // pub fn init_uart(&self) -> UartStruct {
+    //     let raw_ptr  =  self.base_address as *mut UartStruct;
+    //     let rust_reference: UartStruct = unsafe{ *raw_ptr.as_mut().unwrap() };
+    //     rust_reference
+    // }
+// }
 
 // pub unsafe fn uart_init() -> [Option<&'static mut UartStruct>; 3] {
 //     for i in 0..MAX_UART_COUNT {
@@ -127,11 +146,12 @@ pub fn write_uart_character(instance: &mut UartStruct, prn_character: u8) -> u32
 }
 
 
-pub fn write_uart_string(instance: &mut UartStruct, ptr_string: *const u8) -> u32 {
+pub fn write_uart_string(ptr_string: *const u8) -> u32 {
     let mut i = 0;
     let mut temp: u8;
-
+    let mut instance = unsafe { UART_INSTANCE }[0].unwrap();
     unsafe {
+
         // Access the string using unsafe Rust code since it's a raw pointer
         loop {
             temp = ptr::read_volatile(ptr_string.offset(i as isize));
@@ -143,7 +163,7 @@ pub fn write_uart_string(instance: &mut UartStruct, ptr_string: *const u8) -> u3
             }
 
             // Write each character to the UART
-            write_uart_character(instance, temp);
+            write_uart_character(&mut instance, temp);
         }
     }
 

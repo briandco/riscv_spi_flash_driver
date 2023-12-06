@@ -1,17 +1,19 @@
 #![no_std]
 #![no_main]
+#![feature(asm)]
 
 // use cortex_m_rt::entry;
 use riscv_rt::entry;
 pub mod vajra;
-// pub mod spi;
+pub mod start;
+pub mod trap;
 
 #[entry]
+// #[no_mangle]
 fn main() -> !{
     // let object = vajra::FlashWriterEraser::new();
-    let uart = vajra::Uart::new(0x00011300);
-    let mut uart_object = uart.init_uart();
-    vajra::write_uart_string(&mut uart_object, "Hello world from rust".as_ptr());
+    vajra::uart_init();
+    vajra::write_uart_string("Hello world from rust".as_ptr());
     loop{}
 }
 
