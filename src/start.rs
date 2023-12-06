@@ -171,7 +171,7 @@ pub unsafe extern "C" fn init() -> ! {
 
     // trap_init();
 
-    // main();
+    crate::start_shakti();
     
     crate::vajra::write_uart_string("init exited".as_ptr());
     loop {
