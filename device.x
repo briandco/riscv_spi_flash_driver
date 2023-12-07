@@ -1,19 +1,14 @@
 /* device.x */
-
-MEMORY
-{
-    /* Define memory regions from the linker script */
-    RAM      (rwx) : ORIGIN = 0x80000000, LENGTH = 128K 
-}
-
+OUTPUT_ARCH( "riscv" )
+ENTRY(_start)
 /* Define sections from the linker script */
 SECTIONS
 {
-    . = ORIGIN(RAM);
+    . = 0x80000000;
 
     .text.init :
     {
-        *(.text.init)
+        KEEP(*(.text.init))
     }
 
     .text :
@@ -90,7 +85,7 @@ SECTIONS
     . = ALIGN(4);
     _end = .;
 
-    . = ORIGIN(RAM) + LENGTH(RAM) - 0x400;
+    . = 0x80000000 + 0x8000000 - 0x400;
     _free_space = . - _end;
     _STACK_SIZE = (_free_space * 50) / 100 ;
     _HEAP_SIZE = _free_space - _STACK_SIZE;

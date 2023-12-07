@@ -27,9 +27,9 @@
  Registers are initialized, trap entry is setup here.
 */
 
-#include "defines.h"
+@ #include "defines.h"
 
-.section ".text.init"
+.section .text.init
 .globl _start
 
 _start:
@@ -135,14 +135,14 @@ j init
 1:
   j 1b
 
-.section ".tdata.begin"
+.section .tdata.begin
 .globl _tdata_begin
 _tdata_begin:
 
-.section ".tdata.end"
+.section .tdata.end
 .globl _tdata_end
 _tdata_end:
 
-.section ".tbss.end"
+.section .tbss.end
 .globl _tbss_end
 _tbss_end:
