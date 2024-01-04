@@ -1,5 +1,10 @@
+use core::arch::global_asm;
 use riscv::asm;
 use volatile_register::RW;
+
+// Assembly counterpart to this file.
+global_asm!(include_str!("trap.S"));
+global_asm!(include_str!("start.S"));
 
 
 #[repr(C)]

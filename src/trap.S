@@ -27,7 +27,32 @@
         is called. After servicing the trap, context is restored. 
 */
 
-#include "defines.h"
+// #include "defines.h"
+
+// =======================================================
+.globl REGSIZE
+REGSIZE =  8
+
+// Conditionally define LREG and SREG based on the target architecture
+.globl LREG
+.globl SREG
+
+//#if __riscv_xlen == 64
+LREG = ld
+SREG = sd
+//#else
+//LREG = lw
+//SREG = sw
+//#endif
+
+// Define MSTATUS_MPP and MSTATUS_FS
+.globl MSTATUS_MPP
+.globl MSTATUS_FS
+
+MSTATUS_MPP = 0x00001800
+MSTATUS_FS = 0x00006000
+
+//===============================================================
 
   .global trap_entry
   .align 2
@@ -43,37 +68,37 @@
 
   addi sp, sp, -32*REGSIZE
   .p2align 3
-  SREG x1, 1*REGSIZE(sp)
-  SREG x2, 2*REGSIZE(sp)
-  SREG x3, 3*REGSIZE(sp)
-  SREG x4, 4*REGSIZE(sp)
-  SREG x5, 5*REGSIZE(sp)
-  SREG x6, 6*REGSIZE(sp)
-  SREG x7, 7*REGSIZE(sp)
-  SREG x8, 8*REGSIZE(sp)
-  SREG x9, 9*REGSIZE(sp)
-  SREG x10, 10*REGSIZE(sp)
-  SREG x11, 11*REGSIZE(sp)
-  SREG x12, 12*REGSIZE(sp)
-  SREG x13, 13*REGSIZE(sp)
-  SREG x14, 14*REGSIZE(sp)
-  SREG x15, 15*REGSIZE(sp)
-  SREG x16, 16*REGSIZE(sp)
-  SREG x17, 17*REGSIZE(sp)
-  SREG x18, 18*REGSIZE(sp)
-  SREG x19, 19*REGSIZE(sp)
-  SREG x20, 20*REGSIZE(sp)
-  SREG x21, 21*REGSIZE(sp)
-  SREG x22, 22*REGSIZE(sp)
-  SREG x23, 23*REGSIZE(sp)
-  SREG x24, 24*REGSIZE(sp)
-  SREG x25, 25*REGSIZE(sp)
-  SREG x26, 26*REGSIZE(sp)
-  SREG x27, 27*REGSIZE(sp)
-  SREG x28, 28*REGSIZE(sp)
-  SREG x29, 29*REGSIZE(sp)
-  SREG x30, 30*REGSIZE(sp)
-  SREG x31, 31*REGSIZE(sp)
+  sd x1, 1*REGSIZE(sp)
+  sd x2, 2*REGSIZE(sp)
+  sd x3, 3*REGSIZE(sp)
+  sd x4, 4*REGSIZE(sp)
+  sd x5, 5*REGSIZE(sp)
+  sd x6, 6*REGSIZE(sp)
+  sd x7, 7*REGSIZE(sp)
+  sd x8, 8*REGSIZE(sp)
+  sd x9, 9*REGSIZE(sp)
+  sd x10, 10*REGSIZE(sp)
+  sd x11, 11*REGSIZE(sp)
+  sd x12, 12*REGSIZE(sp)
+  sd x13, 13*REGSIZE(sp)
+  sd x14, 14*REGSIZE(sp)
+  sd x15, 15*REGSIZE(sp)
+  sd x16, 16*REGSIZE(sp)
+  sd x17, 17*REGSIZE(sp)
+  sd x18, 18*REGSIZE(sp)
+  sd x19, 19*REGSIZE(sp)
+  sd x20, 20*REGSIZE(sp)
+  sd x21, 21*REGSIZE(sp)
+  sd x22, 22*REGSIZE(sp)
+  sd x23, 23*REGSIZE(sp)
+  sd x24, 24*REGSIZE(sp)
+  sd x25, 25*REGSIZE(sp)
+  sd x26, 26*REGSIZE(sp)
+  sd x27, 27*REGSIZE(sp)
+  sd x28, 28*REGSIZE(sp)
+  sd x29, 29*REGSIZE(sp)
+  sd x30, 30*REGSIZE(sp)
+  sd x31, 31*REGSIZE(sp)
 
   csrr a0, mcause
   csrr a1, mepc
@@ -81,37 +106,37 @@
   jal handle_trap
   csrw mepc, a0
 
-  LREG x1, 1*REGSIZE(sp)
-  LREG x2, 2*REGSIZE(sp)
-  LREG x3, 3*REGSIZE(sp)
-  LREG x4, 4*REGSIZE(sp)
-  LREG x5, 5*REGSIZE(sp)
-  LREG x6, 6*REGSIZE(sp)
-  LREG x7, 7*REGSIZE(sp)
-  LREG x8, 8*REGSIZE(sp)
-  LREG x9, 9*REGSIZE(sp)
-  LREG x10, 10*REGSIZE(sp)
-  LREG x11, 11*REGSIZE(sp)
-  LREG x12, 12*REGSIZE(sp)
-  LREG x13, 13*REGSIZE(sp)
-  LREG x14, 14*REGSIZE(sp)
-  LREG x15, 15*REGSIZE(sp)
-  LREG x16, 16*REGSIZE(sp)
-  LREG x17, 17*REGSIZE(sp)
-  LREG x18, 18*REGSIZE(sp)
-  LREG x19, 19*REGSIZE(sp)
-  LREG x20, 20*REGSIZE(sp)
-  LREG x21, 21*REGSIZE(sp)
-  LREG x22, 22*REGSIZE(sp)
-  LREG x23, 23*REGSIZE(sp)
-  LREG x24, 24*REGSIZE(sp)
-  LREG x25, 25*REGSIZE(sp)
-  LREG x26, 26*REGSIZE(sp)
-  LREG x27, 27*REGSIZE(sp)
-  LREG x28, 28*REGSIZE(sp)
-  LREG x29, 29*REGSIZE(sp)
-  LREG x30, 30*REGSIZE(sp)
-  LREG x31, 31*REGSIZE(sp)
+  ld x1, 1*REGSIZE(sp)
+  ld x2, 2*REGSIZE(sp)
+  ld x3, 3*REGSIZE(sp)
+  ld x4, 4*REGSIZE(sp)
+  ld x5, 5*REGSIZE(sp)
+  ld x6, 6*REGSIZE(sp)
+  ld x7, 7*REGSIZE(sp)
+  ld x8, 8*REGSIZE(sp)
+  ld x9, 9*REGSIZE(sp)
+  ld x10, 10*REGSIZE(sp)
+  ld x11, 11*REGSIZE(sp)
+  ld x12, 12*REGSIZE(sp)
+  ld x13, 13*REGSIZE(sp)
+  ld x14, 14*REGSIZE(sp)
+  ld x15, 15*REGSIZE(sp)
+  ld x16, 16*REGSIZE(sp)
+  ld x17, 17*REGSIZE(sp)
+  ld x18, 18*REGSIZE(sp)
+  ld x19, 19*REGSIZE(sp)
+  ld x20, 20*REGSIZE(sp)
+  ld x21, 21*REGSIZE(sp)
+  ld x22, 22*REGSIZE(sp)
+  ld x23, 23*REGSIZE(sp)
+  ld x24, 24*REGSIZE(sp)
+  ld x25, 25*REGSIZE(sp)
+  ld x26, 26*REGSIZE(sp)
+  ld x27, 27*REGSIZE(sp)
+  ld x28, 28*REGSIZE(sp)
+  ld x29, 29*REGSIZE(sp)
+  ld x30, 30*REGSIZE(sp)
+  ld x31, 31*REGSIZE(sp)
 
   addi sp, sp, 32*REGSIZE
   mret

@@ -1,20 +1,21 @@
 /* device.x */
+
 OUTPUT_ARCH( "riscv" )
 ENTRY(_start)
 /* Define sections from the linker script */
 SECTIONS
 {
-    . = 0x80000000;
+    . = ORIGIN(RAM);
 
     .text.init :
     {
         KEEP(*(.text.init))
-    }
+    } > REGION_TEXT
 
     .text :
     {
-        *(.text)
-    }
+        KEEP(*(.text))
+    } > REGION_TEXT
 
     .rodata :
     {
@@ -23,7 +24,7 @@ SECTIONS
         *(.rodata.*)
         *(.gnu.linkonce.r.*)
         __rodata_end = .;
-    }
+    } > REGION_RODATA
 
     .sdata :
     {
@@ -34,7 +35,7 @@ SECTIONS
         *(.srodata.cst2)
         *(.srodata*)
         *(.sdata .sdata.* .gnu.linkonce.s.*)
-    }
+    } > REGION_DATA AT > REGION_RODATA
 
     .sbss :
     {
@@ -43,7 +44,7 @@ SECTIONS
         *(.sbss.*)
         *(.gnu.linkonce.sb.*)
         __sbss_end = .;
-    }
+    } > REGION_BSS
 
     .data :
     {
@@ -53,7 +54,7 @@ SECTIONS
         *(.data.*)
         *(.gnu.linkonce.d.*)
         __data_end = .;
-    }
+    } > REGION_DATA AT > REGION_RODATA
 
     .bss :
     {
@@ -65,7 +66,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         __bss_end = .;
-    }
+    } > REGION_BSS
 
     .tdata :
     {
@@ -74,13 +75,13 @@ SECTIONS
         *(.tdata)
         *(.tdata.end)
         _tls_end = .;
-    }
+    } > REGION_DATA
 
     .tbss :
     {
         *(.tbss)
         *(.tbss.end)
-    }
+    } > REGION_BSS
 
     . = ALIGN(4);
     _end = .;
@@ -95,7 +96,7 @@ SECTIONS
         _stack_end = .;
         __stack_pointer$ = .;
         _stack = . - _STACK_SIZE;
-    }
+    } > REGION_STACK
 
     . = _stack;
 
@@ -103,5 +104,5 @@ SECTIONS
     {
         _heap = . - _HEAP_SIZE;
         _heap_end = .;
-    }
+    } > REGION_HEAP
 }

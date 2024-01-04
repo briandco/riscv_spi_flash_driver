@@ -27,7 +27,31 @@
  Registers are initialized, trap entry is setup here.
 */
 
-@ #include "defines.h"
+// #include "defines.h"
+// =======================================================
+.globl REGSIZE
+REGSIZE =  8
+
+// Conditionally define LREG and SREG based on the target architecture
+.globl LREG
+.globl SREG
+
+#if __riscv_xlen == 64
+LREG = ld
+SREG = sd
+#else
+LREG = lw
+SREG = sw
+#endif
+
+// Define MSTATUS_MPP and MSTATUS_FS
+.globl MSTATUS_MPP
+.globl MSTATUS_FS
+
+MSTATUS_MPP = 0x00001800
+MSTATUS_FS = 0x00006000
+
+//===============================================================
 
 .section .text.init
 .globl _start
@@ -43,7 +67,8 @@ csrrc   zero, mstatus, t0 #disable global interrupt for all modes
 li      t0, 0x888
 csrrc   zero, mie, t0  # disable machine level interrupt
 
- #define PLICENABLE 0x0C002000
+ .globl PLICENABLE 
+ PLICENABLE = 0x0C002000
  li t6, PLICENABLE
  andi t3,t3,0
  addi t3,t3,0
@@ -52,7 +77,8 @@ csrrc   zero, mie, t0  # disable machine level interrupt
  sb t3, 2(t6)
  sb t3, 3(t6)
 
- #define PLICPRIORITY 0x0C000000
+ .globl PLICPRIORITY
+ PLICPRIORITY = 0x0C000000
  li t6, PLICPRIORITY
  andi t3,t3,0
  sb t3, 0(t6)
