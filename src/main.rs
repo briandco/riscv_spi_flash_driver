@@ -3,10 +3,10 @@
 #![feature(asm)]
 
 // use cortex_m_rt::entry;
-// use riscv_rt::entry;
+use riscv_rt::entry;
 pub mod vajra;
-pub mod start;
-pub mod trap;
+// pub mod start;
+// pub mod trap;
 
 // #[cfg(feature = "riscv64")]
 const REGSIZE: usize = 8;
@@ -29,12 +29,9 @@ const SREG: &str = "sd";
 const MSTATUS_MPP: u32 = 0x00001800;
 const MSTATUS_FS: u32 = 0x00006000;
 
-// #[entry]
-#[no_mangle]
-pub unsafe fn start_shakti() -> !{
-    // let object = vajra::FlashWriterEraser::new();
-    vajra::uart_init();
-    vajra::write_uart_string("Hello world from rust".as_ptr());
+#[entry]
+fn main() -> !{
+    let x = add_variable(5, 10);
     loop{}
 }
 
@@ -43,4 +40,8 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
     loop {
         unsafe { riscv::asm::nop() };
     }
+}
+
+fn add_variable(a: i32, b: i32) -> i32 {
+    a + b
 }
