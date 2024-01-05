@@ -134,22 +134,22 @@ fn trap_init() {
         crate::trap::MCAUSE_INTERRUPT_TABLE[Interrupt::ReservedInterrupt5 as usize] = crate::trap::default_handler;
         crate::trap::MCAUSE_INTERRUPT_TABLE[Interrupt::ReservedInterrupt6 as usize] = crate::trap::default_handler;
 
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::INSTRUCTION_ADDRESS_MISALIGNED as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::INSTRUCTION_ACCESS_FAULT as usize] =crate::trap:: default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::ILLEGAL_INSTRUCTION as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::BREAKPOINT as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::LOAD_ADDRESS_MISALIGNED as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::LOAD_ACCESS_FAULT as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::STORE_AMO_ADDRESS_MISALIGNED as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::STORE_AMO_ACCESS_FAULT as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::ENVIRONMENT_CALL_FROM_U_MODE as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::ENVIRONMENT_CALL_FROM_S_MODE as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::RESERVED_TRAP1 as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::ENVIRONMENT_CALL_FROM_M_MODE as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::INSTRUCTION_PAGE_FAULT as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::LOAD_PAGE_FAULT as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::RESERVED_TRAP2 as usize] = crate::trap::default_handler;
-        // crate::trap::MCAUSE_TRAP_TABLE[Trap::STORE_AMO_PAGE_FAULT as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::InstructionAddressMisaligned as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::InstructionAccessFault as usize] =crate::trap:: default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::IllegalInstruction as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::Breakpoint as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::LoadAddressMisaligned as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::LoadAccessFault as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::StoreAmoAddressMisaligned as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::StoreAmoAccessFault as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::EnvironmentCallFromUMode as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::EnvironmentCallFromSMode as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::ReservedTrap1 as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::EnvironmentCallFromMMode as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::InstructionPageFault as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::LoadPageFault as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::ReservedTrap2 as usize] = crate::trap::default_handler;
+        crate::trap::MCAUSE_TRAP_TABLE[Trap::StoreAmoPageFault as usize] = crate::trap::default_handler;
     }
 
     crate::vajra::write_uart_string("trap_init exited".as_ptr());
