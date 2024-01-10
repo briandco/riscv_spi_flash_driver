@@ -1,0 +1,3 @@
+cargo:rustc-link-search=/home/iyg1kor/projects/Shakti/riscv_spi_flash_driver/target/riscv64imac-unknown-none-elf/debug/build/vajra_flash_driver-ec2552b3a992f04c/out
+cargo:rerun-if-changed=memory.x
+cargo:rerun-if-changed=build.rs
