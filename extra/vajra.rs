@@ -98,10 +98,13 @@ pub static mut UART_INSTANCE: [Option<UartStruct>; MAX_UART_COUNT] = [None; MAX_
 
 pub fn uart_init() {
     unsafe {
+        core::ptr::write(UART0_START as *mut usize,0x4b000);
         for i in 0..MAX_UART_COUNT {
-            let uart_address = UART0_START + i * UART_OFFSET;
+            let mut uart_address = UART0_START + i * UART_OFFSET;
             UART_INSTANCE[i] = Some(core::ptr::read(uart_address as *const UartStruct));
+            
         }
+        
     }
 }
 

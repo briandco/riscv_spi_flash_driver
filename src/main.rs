@@ -4,34 +4,12 @@
 
 // use cortex_m_rt::entry;
 use riscv_rt::entry;
-pub mod vajra;
-// pub mod start;
-// pub mod trap;
 
-// #[cfg(feature = "riscv64")]
-const REGSIZE: usize = 8;
-
-// #[cfg(not(feature = "riscv64"))]
-// const REGSIZE: usize = 4;
-
-// #[cfg(feature = "riscv64")]
-const LREG: &str = "ld";
-
-// #[cfg(not(feature = "riscv64"))]
-// const LREG: &str = "lw";
-
-// #[cfg(feature = "riscv64")]
-const SREG: &str = "sd";
-
-// #[cfg(not(feature = "riscv64"))]
-// const SREG: &str = "sw";
-
-const MSTATUS_MPP: u32 = 0x00001800;
-const MSTATUS_FS: u32 = 0x00006000;
 
 #[entry]
 fn main() -> !{
     let x = add_variable(5, 10);
+
     loop{}
 }
 
@@ -45,3 +23,14 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 fn add_variable(a: i32, b: i32) -> i32 {
     a + b
 }
+
+
+
+
+    //uart_init();
+   // vajra::uart_init();
+    //let mut instance = unsafe { UART_INSTANCE }[0].unwrap();
+    //vajra::write_uart_string("Hello world from rust".as_ptr());
+ 
+    //vajra::write_uart_character(&mut instance, b'x');
+   // write_uart_character('c');
