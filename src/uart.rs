@@ -36,8 +36,8 @@ register_bitfields! {
 //while the FIFO is full. )
       PARITY_ERROR OFFSET(4) NUMBITS(1) [],
  //Parity Error (Sets when The receive character does not
-//have correct parity information and is suspect.      
-      
+//have correct parity information and is suspect.
+
       STS_RX_FULL OFFSET(3) NUMBITS(1) [],
       //Receiver Full (Sets when the Receive Buffer is Full)
 
@@ -50,7 +50,7 @@ register_bitfields! {
         //Transmitter Empty(Sets when the Transmit Buffer is empty).
     ],
 
-    UCR [ 
+    UCR [
          UART_TX_RX_LEN OFFSET(5) NUMBITS(6) [],
          //Character size of data. Maximum length is 32 bits.
          PARITY OFFSET(3) NUMBITS(2) [
@@ -58,7 +58,7 @@ register_bitfields! {
             Odd = 0b01,
             Even = 0b10,
             Unused = 0b11
-            
+
          ],
          //Insert Parity bits
          //00 - None
@@ -66,12 +66,12 @@ register_bitfields! {
         //10- Even
         // 11 - Unused or Undefined
         STOP_BITS OFFSET(1) NUMBITS(2) [
-            
+
             StopBits1 = 0b00,
             StopBits1.5 = 0b01,
             StopBits2 = 0b10
-           
-        
+
+
         ],
         //Stop bits
        //00 - 1 Stop bits
@@ -79,20 +79,19 @@ register_bitfields! {
         //10 - 2 Stop bits
     ],
 
-    /// Integer Baud Rate Divisor.
     TX_REG [
-        /// The integer baud rate divisor.
+
         TX_DATA OFFSET(0) NUMBITS(32) []
     ],
 
-    /// Fractional Baud Rate Divisor.
+
     RCV_REG [
-        ///  The fractional baud rate divisor.
+
         RX_DATA OFFSET(0) NUMBITS(32) []
     ],
 
     IEN [
-        ///  The fractional baud rate divisor.
+
         ENABLE_TX_EMPTY OFFSET(0) NUMBITS(1) [],
         ENABLE_TX_FULL OFFSET(1) NUMBITS(1) [],
         ENABLE_RX_NOT_EMPTY OFFSET(2) NUMBITS(1) [],
@@ -103,11 +102,11 @@ register_bitfields! {
         ENABLE_BREAK_ERROR OFFSET(7) NUMBITS(1) [],
         ENABLE_RX_THRESHOLD OFFSET(8) NUMBITS(1) []
     ],
-      
+
       DELAY [
         COUNT OFFSET(0) NUMBITS(8) []
       ]
-    
+
       IQCYCLES[
         COUNT OFFSET(0) NUMBITS(8) []
       ]
@@ -115,11 +114,8 @@ register_bitfields! {
         ///  The fractional baud rate divisor.
         FIFO_RX OFFSET(0) NUMBITS(8) []
     ]
-  
+
 }
-
-
-
 
 register_structs! {
     #[allow(non_snake_case)]
@@ -134,5 +130,77 @@ register_structs! {
         (0x1C => IQCYCLES: ReadWrite<u8, IQCYCLES::Register>),
         (0x20 => RX_THRESHOLD: WriteOnly<u8, RX_THRESHOLD::Register>),
         (0x24 => @END),
+    }
+}
+
+type Registers = RegisterBlock;
+
+#[derive(PartialEq)]
+enum BlockingMode {
+    Blocking,
+    NonBlocking,
+}
+
+//--------------------------------------------------------------------------------------------------
+// Public Definitions
+//--------------------------------------------------------------------------------------------------
+
+pub struct UartInner {
+    registers: Registers,
+    chars_written: usize,
+    chars_read: usize,
+}
+
+// Export the inner struct so that BSPs can use it for the panic handler.
+pub use UartInner as PanicUart;
+
+/// Representation of the UART.
+pub struct Uart {
+    inner: UartInner,
+}
+
+//--------------------------------------------------------------------------------------------------
+// Public Code
+//--------------------------------------------------------------------------------------------------
+
+impl UartInner {
+    /// Create an instance.
+    ///
+    /// # Safety
+    ///
+    /// - The user must ensure to provide a correct MMIO start address.
+    pub const unsafe fn new(start_addr: usize) -> Self {
+        Self {
+            registers: start_addr,
+            chars_written: 0,
+            chars_read: 0,
+        }
+    }
+
+    pub fn init(&mut self) {
+        // Turn the UART off temporarily.
+        self.registers.UCR.set(0);
+
+        // Clear all pending interrupts.
+        self.registers.IEN.write(0X0000);
+
+        /// Clock = 50Mhz
+        /// baud value = clock /(16 * baud rate)
+        /// baud value  = 50 Mhz /(15 * 19200)  = 163 => 0xA3
+        self.registers.UBR.write(0xA3);
+        self.registers.UCR.write(0X0200);
+    }
+
+    /// Send a character.
+    fn write_char(&mut self, c: char) {
+        // Spin while TX FIFO full is set, waiting for an empty slot.
+        while self.registers.USR.matches_all(USR::STS_TX_FULL::SET) {
+            cpu_core::nop();
+        }
+
+        // Write the character to the buffer.
+        self.registers.TX_REG.set(c as u32);
+
+        //self.chars_written += 1;
     }
 }

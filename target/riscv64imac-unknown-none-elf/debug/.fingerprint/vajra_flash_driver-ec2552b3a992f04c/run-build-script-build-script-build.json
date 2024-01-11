@@ -1,0 +1,1 @@
+{"rustc":9628644194264516170,"features":"","target":0,"profile":0,"path":0,"deps":[[10296409746875977215,"build_script_build",false,1157711703823516682]],"local":[{"RerunIfChanged":{"output":"riscv64imac-unknown-none-elf/debug/build/vajra_flash_driver-ec2552b3a992f04c/output","paths":["memory.x","build.rs"]}}],"rustflags":[],"metadata":0,"config":0,"compile_kind":0}
