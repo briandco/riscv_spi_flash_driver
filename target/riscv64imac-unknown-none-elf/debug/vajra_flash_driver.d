@@ -1,1 +1,0 @@
-/home/iyg1kor/projects/Shakti/riscv_spi_flash_driver/target/riscv64imac-unknown-none-elf/debug/vajra_flash_driver: /home/iyg1kor/projects/Shakti/riscv_spi_flash_driver/build.rs /home/iyg1kor/projects/Shakti/riscv_spi_flash_driver/memory.x /home/iyg1kor/projects/Shakti/riscv_spi_flash_driver/src/main.rs /home/iyg1kor/projects/Shakti/riscv_spi_flash_driver/src/uart.rs
