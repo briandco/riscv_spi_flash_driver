@@ -10,6 +10,6 @@ riscv-rt = "0.11.0"
 panic-halt = "0.2.0"
 riscv = "0.10"
 volatile-register = "0.2.2"
-tock-registers = {version = "0.8.x", default-features = false, features = ["register_types"], optional = true}
+tock-registers = {version = "0.9.0"}
 
 
