@@ -1,21 +1,19 @@
+use crate::common::MMIODerefWrapper;
 use core::{marker::PhantomData, ops};
-
 use riscv::asm::nop;
 use tock_registers::{
-    interfaces::{Readable, Writeable, ReadWriteable},
+    interfaces::{ReadWriteable, Readable, Writeable},
     register_bitfields, register_structs,
-    registers::{ReadOnly, ReadWrite, WriteOnly, self},
+    registers::{self, ReadOnly, ReadWrite, WriteOnly},
 };
 
-use self::{UCR::PARITY::Unused, UBR::BAUD};
+use self::{UBR::BAUD, UCR::PARITY::Unused};
 
 //--------------------------------------------------------------------------------------------------
 // Private Definitions
 //--------------------------------------------------------------------------------------------------
 
-// PL011 UART registers.
-//
-// Descriptions taken from "PrimeCell UART (PL011) Technical Reference Manual" r1p5.
+pub const UART_OFFSET   :   usize = 0x0001_1300;
 
 pub const BREAK_ERROR: u8 = 1 << 7;
 pub const FRAME_ERROR: u8 = 1 << 6;
@@ -28,7 +26,7 @@ pub const STS_TX_EMPTY: u8 = 1 << 0;
 
 register_structs! {
     #[allow(non_snake_case)]
-    pub Registers{
+    pub RegistersBlock{
         (0x00 => UBR: ReadWrite<u32>),
        // (0x02 => _reserved0),
         (0x04 => TX_REG: WriteOnly<u32>),
@@ -157,121 +155,30 @@ register_bitfields! {
     ]
 
 }
+/// Abstraction for the associated MMIO registers.
+type Registers = MMIODerefWrapper<RegistersBlock>;
 
-pub fn test_tock_reg() -> char {
-    let registers: *const Registers = 0x0001_1300 as *const Registers;
-    unsafe {
-        let baud_value = (*registers).UBR.get() as u8 as char;
-        baud_value
-    }
+pub struct UartInner {
+    registers: Registers,
 }
 
-// raw access ==================================================
-pub fn write_uart_char(){
-    let registers: *const Registers = 0x0001_1300 as *const Registers;
-    let c = 'A';
-    unsafe{
-        while (*registers).USR.matches_all(USR::STS_TX_FULL::SET){ 
-            nop() ;
-        }
-        (*registers).TX_REG.set(c as u32);
+impl UartInner {
+    pub const unsafe fn new(mmio_start_addr: usize) -> Self {
+        unsafe {Self {
+            registers: Registers::new(mmio_start_addr),
+        }}
     }
-}
 
-
-// pub struct MMIODerefWrapper<T> {
-//     start_addr: usize,
-//     phantom: PhantomData<fn() -> T>,
-// }
-
-// impl<T> MMIODerefWrapper<T> {
-//     /// Create an instance.
-//     pub const unsafe fn new(start_addr: usize) -> Self {
-//         Self {
-//             start_addr,
-//             phantom: PhantomData,
-//         }
-//     }
-// }
-
-// impl<T> ops::Deref for MMIODerefWrapper<T> {
-//     type Target = T;
-
-//     fn deref(&self) -> &Self::Target {
-//         unsafe { &*(self.start_addr as *const T) }
-//     }
-// }
-
-// type Registers = MMIODerefWrapper<RegisterBlock>;
-
-// #[derive(PartialEq)]
-// enum BlockingMode {
-//     Blocking,
-//     NonBlocking,
-// }
-
-//--------------------------------------------------------------------------------------------------
-// Public Definitions
-//--------------------------------------------------------------------------------------------------
-
-// pub struct UartInner {
-//     registers: Registers,
-//     chars_written: usize,
-//     chars_read: usize,
-// }
-
-// // Export the inner struct so that BSPs can use it for the panic handler.
-// pub use UartInner as PanicUart;
-
-// /// Representation of the UART.
-// // pub struct Uart {
-// //     inner: UartInner,
-// // }
-
-// //--------------------------------------------------------------------------------------------------
-// // Public Code
-// //--------------------------------------------------------------------------------------------------
-
-// impl UartInner {
-//     /// Create an instance.
-//     ///
-//     /// # Safety
-//     ///
-//     /// - The user must ensure to provide a correct MMIO start address.
-//     pub const unsafe fn new(start_addr: usize) -> Self {
-//         Self {
-//             registers: Registers::new(start_addr),
-//             chars_written: 0,
-//             chars_read: 0,
-//         }
-//     }
-
-//     pub fn init(&mut self) {
-//         // Turn the UART off temporarily.
-//         self.registers.UCR.set(0);
-
-//         // Clear all pending interrupts.
-//         self.registers.IEN.set(0x0000);
-
-//         /// Clock = 50Mhz
-//         /// baud value = clock /(16 * baud rate)
-//         /// baud value  = 50 Mhz /(16 * 19200)  = 163 => 0xA3
-//         self.registers.UBR.set(0xA3);
+    // raw access ==================================================
+    pub fn write_uart_char(&mut self, c: char) {
         
-//     }
+        unsafe {
+            // while self.registers.USR.is_set(USR::STS_TX_FULL) {
+            //     nop();
+            // }
+            self.registers.TX_REG.set(c as u32);
+        }
+    }
+}
 
-//     /// Send a character.
-//     pub fn write_char(&mut self, c: char) {
-//         // Spin while TX FIFO full is set, waiting for an empty slot.
-//         while self.registers.USR.matches_all(USR::STS_TX_FULL::SET)
-//         //.matches_all(USR::STS_TX_FULL::SET) {
-//         { //cpu_core::nop();
-//             unsafe { nop() };
-//         }
 
-//         // Write the character to the buffer.
-//         self.registers.TX_REG.set(c as u32);
-
-//         //self.chars_written += 1;
-//     }
-// }

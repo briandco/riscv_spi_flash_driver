@@ -4,12 +4,16 @@
 
 // use cortex_m_rt::entry;
 use riscv_rt::entry;
+use uart::{UartInner, UART_OFFSET};
 pub mod uart;
+pub mod common;
 
 #[entry]
 fn main() -> ! {
-    let char_a = uart::test_tock_reg();
-    uart::write_uart_char();
+
+    let mut uart = UartInner::new(UART_OFFSET);
+    uart.write_uart_char('B');
+    
     let x = add_variable(5, 10);
     loop {}
 }
@@ -24,11 +28,3 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 fn add_variable(a: i32, b: i32) -> i32 {
     a + b
 }
-
-//uart_init();
-// vajra::uart_init();
-//let mut instance = unsafe { UART_INSTANCE }[0].unwrap();
-//vajra::write_uart_string("Hello world from rust".as_ptr());
-
-//vajra::write_uart_character(&mut instance, b'x');
-// write_uart_character('c');
