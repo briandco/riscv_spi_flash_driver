@@ -4,19 +4,13 @@
 
 // use cortex_m_rt::entry;
 use riscv_rt::entry;
-use uart::PanicUart;
 pub mod uart;
 
 #[entry]
 fn main() -> ! {
-    //let x = add_variable(5, 10);
-    unsafe {
-        let mut u0 = uart::UartInner::new(0x00011300);
-        u0.init();
-        let x = add_variable(5, 10);
-        u0.write_char('c');
-    };
-
+    let char_a = uart::test_tock_reg();
+    uart::write_uart_char();
+    let x = add_variable(5, 10);
     loop {}
 }
 

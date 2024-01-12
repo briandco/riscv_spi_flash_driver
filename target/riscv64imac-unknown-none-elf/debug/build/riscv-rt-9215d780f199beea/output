@@ -1,0 +1,4 @@
+cargo:rerun-if-changed=bin/riscv64imc-unknown-none-elf.a
+cargo:rustc-link-lib=static=riscv-rt
+cargo:rustc-link-search=/home/nuc2kor/Desktop/devspace/test/IIT_MADRAS/riscv_spi_flash_driver/target/riscv64imac-unknown-none-elf/debug/build/riscv-rt-9215d780f199beea/out
+cargo:rerun-if-changed=link.x
