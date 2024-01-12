@@ -1,1 +1,0 @@
-{"rustc":225508634607999698,"features":"","target":0,"profile":0,"path":0,"deps":[[5613648079480112976,"build_script_build",false,10829036074372701696]],"local":[{"RerunIfChanged":{"output":"riscv64imac-unknown-none-elf/debug/build/riscv-rt-9215d780f199beea/output","paths":["bin/riscv64imc-unknown-none-elf.a","link.x"]}}],"rustflags":[],"metadata":0,"config":0,"compile_kind":0}
