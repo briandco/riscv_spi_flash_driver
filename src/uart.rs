@@ -1,13 +1,11 @@
 use crate::common::MMIODerefWrapper;
-use core::{marker::PhantomData, ops};
 use riscv::asm::nop;
 use tock_registers::{
-    interfaces::{ReadWriteable, Readable, Writeable},
+    interfaces::{Readable, Writeable},
     register_bitfields, register_structs,
-    registers::{self, ReadOnly, ReadWrite, WriteOnly},
+    registers::{ReadOnly, ReadWrite, WriteOnly},
 };
 
-use self::{UBR::BAUD, UCR::PARITY::Unused};
 
 //--------------------------------------------------------------------------------------------------
 // Private Definitions
@@ -173,11 +171,19 @@ impl UartInner {
     pub fn write_uart_char(&mut self, c: char) {
         
         unsafe {
-            // while self.registers.USR.is_set(USR::STS_TX_FULL) {
-            //     nop();
-            // }
+            while self.registers.USR.is_set(USR::STS_TX_FULL) {
+                nop();
+            }
             self.registers.TX_REG.set(c as u32);
         }
+    }
+
+    pub fn write_uart_string(&mut self, message: &str){
+
+        for i in message.as_bytes(){
+            self.write_uart_char(*i as char);
+        }
+
     }
 }
 

@@ -11,7 +11,7 @@ pub mod common;
 #[entry]
 fn main() -> ! {
 
-    let mut uart = UartInner::new(UART_OFFSET);
+    let mut uart = unsafe{UartInner::new(UART_OFFSET)};
     uart.write_uart_char('B');
     
     let x = add_variable(5, 10);
