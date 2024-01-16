@@ -1,5 +1,5 @@
 use crate::common::MMIODerefWrapper;
-use riscv::asm::nop;
+use riscv::{asm::nop, register};
 use tock_registers::{
     interfaces::{Readable, Writeable},
     register_bitfields, register_structs,
@@ -26,24 +26,26 @@ register_structs! {
     #[allow(non_snake_case)]
     pub RegistersBlock{
         (0x00 => UBR: ReadWrite<u32>),
-       // (0x02 => _reserved0),
+        // (0x02 => _reserved0),
         (0x04 => TX_REG: WriteOnly<u32>),
         (0x08 => RCV_REG: ReadOnly<u32, RCV_REG::Register>),
         (0x0C => USR : ReadOnly<u32, USR::Register>),
-        //(0x0D => _reserved1),
-        //(0x0E => _reserved2),
+        // (0x0D => _reserved1),
+        // (0x0E => _reser/ved2),
         (0x10 => DELAY: ReadWrite<u32, DELAY::Register>),
-        //(0x12 => _reserved3),
+        // (0x12 => _reserved3),
         (0x14 => UCR: ReadWrite<u32, UCR::Register>),
-        //(0x16 => _reserved4),
+        // (0x16 => _reserved4),
         (0x18 => IEN: ReadWrite<u32, IEN::Register>),
-        //(0x1A => _reserved5),
+        // (0x1A => _reserved5),
         (0x1C => IQCYCLES: ReadWrite<u32, IQCYCLES::Register>),
-        //(0x1D => _reserved6),
-        //(0x1E => _reserved7),
+        // (0x1D => _reserved6),
+        // (0x1E => _reserved7),
+        // (0x1F => _reserved11),
         (0x20 => RX_THRESHOLD: WriteOnly<u32, RX_THRESHOLD::Register>),
-        //(0x21 => _reserved8),
-        //(0x22 => _reserved9),
+        // (0x21 => _reserved8),
+        // (0x22 => _reserved9),
+        // (0x23 => _reserved10),
         (0x24 => @END),
     }
 }
@@ -81,9 +83,15 @@ register_bitfields! {
         STS_RX_NOT_FULL OFFSET(2) NUMBITS(1) [],
         // Receiver Not Empty (Sets when there is some data in the
         //Receive Buffer).
-        STS_TX_FULL OFFSET(1) NUMBITS(1) [],
+        STS_TX_FULL OFFSET(1) NUMBITS(1) [
+            EMPTY = 0,
+            FULL = 1,
+        ],
         //Transmitter Full (Sets when the transmit Buffer is full)
-        STS_TX_EMPTY OFFSET(0) NUMBITS(1) []
+        STS_TX_EMPTY OFFSET(0) NUMBITS(1) [
+            EMPTY = 1,
+            FULL = 0,
+        ]
         //Transmitter Empty(Sets when the Transmit Buffer is empty).
     ],
 
@@ -171,7 +179,7 @@ impl UartInner {
     pub fn write_uart_char(&mut self, c: char) {
         
         unsafe {
-            while self.registers.USR.is_set(USR::STS_TX_FULL) {
+            while self.registers.USR.any_matching_bits_set(USR::STS_TX_FULL::FULL ) {
                 nop();
             }
             self.registers.TX_REG.set(c as u32);
