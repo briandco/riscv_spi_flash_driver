@@ -6,6 +6,8 @@ use tock_registers::{
     registers::{ReadOnly, ReadWrite, WriteOnly}, fields::FieldValue,
 };
 
+use self::TX_REG::TX_DATA;
+
 
 //--------------------------------------------------------------------------------------------------
 // Private Definitions
@@ -178,14 +180,15 @@ impl UartInner {
     pub fn write_uart_char(&mut self, c: char) {
         
         unsafe {
-            // while self
-            // .registers
-            // .USR
-            // .any_matching_bits_set(USR::STS_TX_FULL::EMPTY ) {
-            //     nop();
-            // }           
+            while self
+            .registers
+            .USR
+            .any_matching_bits_set(USR::STS_TX_FULL::EMPTY ) {
+                nop();
+            }           
 
-            self.registers.TX_REG.set(c as u32);
+            self.registers.TX_REG.set(TX_REG::TX_DATA::CLEAR);
+            
         }
     }
 

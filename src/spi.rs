@@ -1,4 +1,4 @@
-use core::arch::riscv64::nop;
+
 
 use tock_registers::{
     interfaces::{Readable, Writeable, ReadWriteable},
@@ -311,15 +311,43 @@ impl SPIInner{
         self.registers.SPI_CR2.modify(SPI_CR2::SPI_RX_START::SET);
     }
 
-    pub fn flash_write_enable(&mut self){
+        /**
+     * @fn int flash_write_enable(void)
+     * @brief to set the WEL (Write Enable Latch) bit in status register
+     * @details Before modifying content of flash, one should enable the WEL bit first
+     * @warning Without enabling this bit one cannot erase/write into the flash
+     * @return int
+     */
+    pub fn flash_write_enable(&mut self)->u32{
         self.registers.SPI_DR1.set(0x06000000);
         self.registers.SPI_DR5.set(0x06);
         self.registers.SPI_CR1.modify(SPI_CR1::SPI_CPOL::ONE_IDLE  + SPI_CR1::SPI_CPHA::SECOND_CLK + SPI_CR1::SPI_BR.val(7)
-                                        + SPI_CR1::SPI_SPE::SET + SPI_CR1::SPI_TOTAL_BITS_RX::CLEAR + SPI_TOTAL_BITS_TX::SET);
+                                        + SPI_CR1::SPI_SPE::SET + SPI_CR1::SPI_TOTAL_BITS_RX::CLEAR + SPI_CR1::SPI_TOTAL_BITS_TX.val(8));
         while self.registers.SPI_SR.any_matching_bits_set(SPI_SR::SPI_BSY::SET) {
             
         }
+        1
+    }
+
+    /**
+     * @fn int flash_clear_sr(void)
+     * @brief to reset the status register
+     * @details It will reset the bits of status register
+     * @return int
+     */
+    pub fn flash_clear_sr(&mut self)->u32{
+        self.registers.SPI_DR1.set(0x30000000);
+        self.registers.SPI_DR5.set(0x30);
+        self.registers.SPI_CR1.modify(SPI_CR1::SPI_CPOL::ONE_IDLE  + SPI_CR1::SPI_CPHA::SECOND_CLK + SPI_CR1::SPI_BR.val(7)
+                                        + SPI_CR1::SPI_SPE::SET + SPI_CR1::SPI_TOTAL_BITS_RX::CLEAR + SPI_CR1::SPI_TOTAL_BITS_TX.val(8));
+        while self.registers.SPI_SR.any_matching_bits_set(SPI_SR::SPI_BSY::SET) {
+            
+        }
+        1
     }
 
 }
 
+
+
+ 
