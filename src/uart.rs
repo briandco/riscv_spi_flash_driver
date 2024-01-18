@@ -3,7 +3,7 @@ use riscv::{asm::nop, register};
 use tock_registers::{
     interfaces::{Readable, Writeable},
     register_bitfields, register_structs,
-    registers::{ReadOnly, ReadWrite, WriteOnly},
+    registers::{ReadOnly, ReadWrite, WriteOnly}, fields::FieldValue,
 };
 
 
@@ -13,25 +13,24 @@ use tock_registers::{
 
 pub const UART_OFFSET   :   usize = 0x0001_1300;
 
-pub const BREAK_ERROR: u8 = 1 << 7;
-pub const FRAME_ERROR: u8 = 1 << 6;
-pub const OVERRUN: u8 = 1 << 5;
-pub const PARITY_ERROR: u8 = 1 << 4;
-pub const STS_RX_FULL: u8 = 1 << 3;
-pub const STS_RX_NOT_EMPTY: u8 = 1 << 2;
-pub const STS_TX_FULL: u8 = 1 << 1;
-pub const STS_TX_EMPTY: u8 = 1 << 0;
+// pub const BREAK_ERROR: u8 = 1 << 7;
+// pub const FRAME_ERROR: u8 = 1 << 6;
+// pub const OVERRUN: u8 = 1 << 5;
+// pub const PARITY_ERROR: u8 = 1 << 4;
+// pub const STS_RX_FULL: u8 = 1 << 3;
+// pub const STS_RX_NOT_EMPTY: u8 = 1 << 2;
+// pub const STS_TX_FULL: u8 = 1 << 1;
+// pub const STS_TX_EMPTY: u8 = 1 << 0;
 
 register_structs! {
     #[allow(non_snake_case)]
-    pub RegistersBlock{
-        (0x00 => UBR: ReadWrite<u32>),
-        // (0x02 => _reserved0),
+    pub RegisterBlock{
+        (0x00 => UBR: ReadWrite<u16>),
+        (0x02 => _reserved0),
         (0x04 => TX_REG: WriteOnly<u32>),
         (0x08 => RCV_REG: ReadOnly<u32, RCV_REG::Register>),
-        (0x0C => USR : ReadOnly<u32, USR::Register>),
-        // (0x0D => _reserved1),
-        // (0x0E => _reser/ved2),
+        (0x0C => USR : ReadOnly<u8, USR::Register>),
+        (0x0D => _reserved1),
         (0x10 => DELAY: ReadWrite<u32, DELAY::Register>),
         // (0x12 => _reserved3),
         (0x14 => UCR: ReadWrite<u32, UCR::Register>),
@@ -162,10 +161,10 @@ register_bitfields! {
 
 }
 /// Abstraction for the associated MMIO registers.
-type Registers = MMIODerefWrapper<RegistersBlock>;
+type Registers = MMIODerefWrapper<RegisterBlock>;
 
 pub struct UartInner {
-    registers: Registers,
+registers: Registers,
 }
 
 impl UartInner {
@@ -179,12 +178,17 @@ impl UartInner {
     pub fn write_uart_char(&mut self, c: char) {
         
         unsafe {
-            while self.registers.USR.any_matching_bits_set(USR::STS_TX_FULL::FULL ) {
-                nop();
-            }
+            // while self
+            // .registers
+            // .USR
+            // .any_matching_bits_set(USR::STS_TX_FULL::EMPTY ) {
+            //     nop();
+            // }           
+
             self.registers.TX_REG.set(c as u32);
         }
     }
+
 
     pub fn write_uart_string(&mut self, message: &str){
 

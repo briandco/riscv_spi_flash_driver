@@ -7,6 +7,7 @@ use riscv_rt::entry;
 use uart::{UartInner, UART_OFFSET};
 pub mod uart;
 pub mod common;
+pub mod spi;
 
 #[entry]
 fn main() -> ! {
