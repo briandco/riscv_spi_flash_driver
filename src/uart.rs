@@ -198,8 +198,25 @@ impl UartInner {
         for i in message.as_bytes(){
             self.write_uart_char(*i as char);
         }
-
     }
+
+    pub fn read_uart_character(&mut self, prn_character: &mut char) -> u8 {
+    
+        // // Wait until the RX (receive) buffer is not empty
+        // while (instance.status & STS_RX_NOT_EMPTY) == 0 {
+        //     // You might want to add a delay or use some other synchronization mechanism here
+        // }
+    
+        // Read the received character from the receive register
+        let temp = self.registers.RCV_REG.get();//instance.rcv_reg;
+    
+        // Store the received character in the memory location pointed by prn_character
+        *prn_character = unsafe { char::from_u32_unchecked(temp) };
+    
+        // Return 1 to indicate successful read
+        1
+    }
+    
 }
 
 

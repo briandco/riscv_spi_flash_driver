@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(asm)]
 
-// use cortex_m_rt::entry;
+
 use riscv_rt::entry;
 use uart::{UartInner, UART_OFFSET};
 pub mod uart;

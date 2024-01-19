@@ -346,6 +346,21 @@ impl SPIInner{
         1
     }
 
+        /**
+     * @fn int bitExtracted(int number, int k, int p)
+     * @brief Extract the k number of bit from (p-1) position of 'number'
+     * @details If one want to extract the k bits from (p-1) position in 32 bit "number".   
+     * @param int (number (32 bit))
+     * @param int (k (number of bits to be extracted))
+     * @param int (p (position from where the bits to be extracted))
+     * @return int (32 bit which have k bit from "number" and rest are zero)
+     */
+    fn bit_extracted(number: u32, k: u32, p: u32) -> u32 {
+        ((1 << k) - 1) & (number >> (p - 1))
+    }
+
+    
+
 }
 
 
