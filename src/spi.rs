@@ -355,11 +355,168 @@ impl SPIInner{
      * @param int (p (position from where the bits to be extracted))
      * @return int (32 bit which have k bit from "number" and rest are zero)
      */
-    fn bit_extracted(number: u32, k: u32, p: u32) -> u32 {
+    pub fn bit_extracted(number: u32, k: u32, p: u32) -> u32 {
         ((1 << k) - 1) & (number >> (p - 1))
     }
 
+    /**
+     * @fn int flash_cmd_addr(int command, int addr)
+     * @brief Use for sending 8bit of command + 32 bit of address 
+     * @details Useful for function like erase
+     * @warning to move data drom dr register to fifo there must be some data into spi_dr5 
+     * @param int (command (opcode))
+     * @param int (addr (address after the opcode))
+     * @return int
+     */
+    pub fn flash_cmd_addr(&mut self, command: u32,  addr:u32) -> u32
+    {
+        let address1 = SPIInner::bit_extracted(addr, 24, 9);
+        let mut address2 = SPIInner::bit_extracted(addr, 8, 1);
+        let data1 = command | address1 ;
+        address2 = address2 << 24;
+        self.registers.SPI_DR1.set(data1);
+        self.registers.SPI_DR2.set(address2);
+        self.registers.SPI_DR5.set(0x0);
+        self.registers.SPI_CR1.modify(SPI_CR1::SPI_CPOL::ONE_IDLE  + SPI_CR1::SPI_CPHA::SECOND_CLK + SPI_CR1::SPI_BR.val(7)
+                                            + SPI_CR1::SPI_SPE::SET + SPI_CR1::SPI_TOTAL_BITS_RX::CLEAR + SPI_CR1::SPI_TOTAL_BITS_TX.val(40));
+        
+        //waitfor(20);
+        while self.registers.SPI_SR.any_matching_bits_set(SPI_SR::SPI_BSY::SET) {
+                
+        }
+        1
+    }
     
+        /**
+     * @fn void flash_cmd_addr_data(int command, int addr, int data)
+     * @brief useful for function like Write 
+     * @details use for sending 8bit command +32bit of write address + 32 bit of write data
+     * @warning to move data from data register to fifo there must be some data into spi_dr5
+     * @param int (command (opcode))
+     * @param int (addr(address after the opcode))
+     * @param int (data (data after the address))
+     */
+    pub fn flash_cmd_addr_data(&mut self, command:u32, addr:u32, data:u32)
+    {
+        let cmd_addr = command | ( (addr & 0xFFFFFF00)  >> 8);
+        let data1 = ( (addr & 0xFF)  << 24 ) |( (data & 0xFFFFFF00)  >> 8);
+        let data2 = ( (data & 0xFF)  << 24 ) & 0xFF000000;
+
+        //log_debug("\n cmd: %x;d1: %x; d2: %x", cmd_addr, data1, data2);
+
+        self.registers.SPI_DR1.set(cmd_addr);
+        self.registers.SPI_DR2.set(data1);
+        self.registers.SPI_DR3.set(data2);
+        self.registers.SPI_DR5.set(0x0);
+        self.registers.SPI_CR1.modify(SPI_CR1::SPI_CPOL::ONE_IDLE  + SPI_CR1::SPI_CPHA::SECOND_CLK + SPI_CR1::SPI_BR.val(7)
+                                            + SPI_CR1::SPI_SPE::SET + SPI_CR1::SPI_TOTAL_BITS_RX::CLEAR + SPI_CR1::SPI_TOTAL_BITS_TX.val(72));
+        
+
+       //waitfor(20);
+       while self.registers.SPI_SR.any_matching_bits_set(SPI_SR::SPI_BSY::SET) {
+                
+       }
+        
+        //flash_status_register_read();
+    }
+
+    /**
+     * @fn void flash_write(int address, int data)
+     * @brief  Write 4bytes of data from given address
+     * @details flash_cmd_addr_data with opcode 12h.  
+     * @warning before writing into the flash one should enable the WEL bit spi_sr by using write_enable(void)
+     * @param int (addres (write address))
+     * @param int(data (write data))
+     */
+    pub fn flash_write(&mut self, address:u32, data:u32)
+    {
+        SPIInner::flash_write_enable(self);
+        SPIInner::flash_cmd_addr_data(self,0x12000000, address, data);
+        // flash_status_register_read();
+    }
+
+    /**
+     * @fn int flash_cmd_to_read(int command, int addr)
+     * @briefUse useful for function like read
+     * @details for sending command of 8bit + read address of 32bit + 8bit of dummy cycle and receive 
+     *          32bit value from flash 
+     * @warning As receive shoild start as soon as transmit state end, use spi_rx_tx_start() Before 
+     *          setting control register 1
+     * @param int (command (opcode))
+     * @param int (addr(read_address))
+     * @return int 
+     */
+    pub fn flash_cmd_to_read(&mut self, command:u32, addr:u32) -> u32
+    {
+        
+        let mut address2 = SPIInner::bit_extracted(addr, 8, 1);
+
+        address2 = address2 << 24;
+        self.registers.SPI_DR1.set(command  | ( (addr & 0xFFFFFF00) >> 8) );
+        self.registers.SPI_DR2.set((addr & 0xFF) << 24);
+        self.registers.SPI_DR5.set(0x0);
+        self.registers.SPI_CR2.modify(SPI_CR2::SPI_RX_IMM_START::SET);
+
+        self.registers.SPI_CR1.modify(SPI_CR1::SPI_CPOL::ONE_IDLE  + SPI_CR1::SPI_CPHA::SECOND_CLK + SPI_CR1::SPI_BR.val(7)
+                                            + SPI_CR1::SPI_SPE::SET + SPI_CR1::SPI_TOTAL_BITS_RX.val(32) + SPI_CR1::SPI_TOTAL_BITS_TX.val(48));
+        
+        
+        //waitfor(2000);
+
+        //if(spi_rxne_enable()) 
+        //{
+            self.registers.SPI_DR5.get()
+        //}
+    }
+
+    /** @fn int flash_read(int address)
+     * @brief read the 4bytes data from given address 
+     * @details flash_cmd_to_read with opcode 0Bh for fast read
+     * @param int (address (read address))
+     * @return int 
+     */
+    pub fn flash_read(&mut self, address:u32) -> u32
+    {
+        let read_value = SPIInner::flash_cmd_to_read(self, 0x0C000000,address);
+        read_value
+    }
+
+    /**
+ * @fn int flash_cmd_read(int command)
+ * @brief usefull for reading status register
+ * @details use for sending 8bit command and receive the 32bit of data
+ * @param int command (opcode)
+ * @return int  value (flash response to opcode)
+ */
+    pub fn flash_cmd_read(&mut self, command:u32) -> u32
+    {
+        self.registers.SPI_DR1.set(command );
+        self.registers.SPI_DR5.set(command);
+        
+        self.registers.SPI_CR1.modify(SPI_CR1::SPI_CPOL::ONE_IDLE  + SPI_CR1::SPI_CPHA::SECOND_CLK + SPI_CR1::SPI_BR.val(7)
+                                            + SPI_CR1::SPI_SPE::SET + SPI_CR1::SPI_TOTAL_BITS_RX.val(32) + SPI_CR1::SPI_TOTAL_BITS_TX.val(8));
+        
+        // if(spi_rxne_enable()) {
+        //     dr5 = *spi_dr5;
+        // }
+        // return dr5;
+        while self.registers.SPI_SR.any_matching_bits_set(SPI_SR::SPI_RXNE::SET) {
+                
+        }        
+        self.registers.SPI_DR5.get()
+    }
+
+    /**
+     * @fn  void flash_erase(int address)
+     * @brief Erase the flash
+     * @details Erase the 64kb sector from given address 
+     * @warning before erasing the flash one should enable the WEL bit spi_sr by using write_enable()
+     * @param int (address (address from which data should erase))
+     */
+    pub fn flash_erase(&mut self, address:u32)
+    {
+        SPIInner::flash_cmd_addr(self, 0xdc000000, address);
+    }
 
 }
 

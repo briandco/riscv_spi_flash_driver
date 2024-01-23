@@ -180,14 +180,14 @@ impl UartInner {
     pub fn write_uart_char(&mut self, c: char) {
         
         unsafe {
-            while self
-            .registers
-            .USR
-            .any_matching_bits_set(USR::STS_TX_FULL::EMPTY ) {
-                nop();
-            }           
+            // while self
+            // .registers
+            // .USR
+            // .any_matching_bits_set(USR::STS_TX_FULL::EMPTY ) {
+            //     nop();
+            // }           
 
-            self.registers.TX_REG.set(TX_REG::TX_DATA::CLEAR);
+            // self.registers.TX_REG.set(TX_REG::TX_DATA::CLEAR);
             
         }
     }
